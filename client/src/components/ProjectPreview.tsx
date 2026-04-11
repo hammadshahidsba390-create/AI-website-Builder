@@ -18,7 +18,7 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
     ({ project, isGenerating, device = 'desktop', showEditorPanel = true }, ref) => {
 
         const iframeRef = useRef<HTMLIFrameElement>(null)
-        const [selectedElemnt, setSelectedElement] = useState<any>(null)
+        const [selectedElemnt, setSelectedElement] = useState<unknown>(null)
 
         const resolutions = {
             phone: 'w-[412px]',
@@ -31,8 +31,7 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
                 if (!doc) return undefined;
 
                 // 1. Remove our selection class / attributes /outline from all elements
-                doc.querySelectorAll('ai-selected-element,[data-ai-selected]').forEach
-                    ((el) => {
+                doc.querySelectorAll('ai-selected-element,[data-ai-selected]').forEach((el) => {
                         el.classList.remove('ai-selected-element');
                         el.removeAttribute('data-ai-selected');
                         (el as HTMLElement).style.outline = '';
@@ -66,7 +65,7 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
         }, [])
 
 
-        const handleUpdate = (updates: any) => {
+        const handleUpdate = (updates: Record<string, unknown>) => {
             if (iframeRef.current?.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({
                     type: 'UPDATE_ELEMENT',

@@ -13,7 +13,7 @@ interface EditorPanelProps {
       fontSize: string;
     }
   } | null;
-  onUpdate: (updates: any) => void;
+  onUpdate: (updates: Record<string, unknown>) => void;
   onClose: () => void;
 }
 

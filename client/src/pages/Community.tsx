@@ -7,11 +7,11 @@ import Footer from '../components/Footer';
 
 const Community = () => {
   const [loading, setLoading] = useState(true);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects] = useState<Project[]>(dummyProjects);
   const navigate = useNavigate();
 
   const fetchProjects = async () => {
-    setProjects(dummyProjects);
+    // Data is already initialized in state
 
     // Simulate loading
     setTimeout(() => {

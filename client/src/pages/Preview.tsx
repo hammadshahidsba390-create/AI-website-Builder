@@ -10,19 +10,19 @@ const Preview = () => {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const fetchCode = async () => {
-    setTimeout(() => {
-      const code = dummyProjects.find(project => project.id === projectId)?.
-        current_code;
-      if (code) {
-        setCode(code);
-        setLoading(false)
-      }
-    }, 2000)
-  }
   useEffect(() => {
+    const fetchCode = async () => {
+      setTimeout(() => {
+        const foundCode = dummyProjects.find(project => project.id === projectId)?.
+          current_code;
+        if (foundCode) {
+          setCode(foundCode);
+          setLoading(false)
+        }
+      }, 2000)
+    }
     fetchCode()
-  }, [])
+  }, [projectId])
 
   if (loading) {
     return (

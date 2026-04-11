@@ -7,6 +7,10 @@ import Community from "./pages/Community";
 import Home from "./pages/Home";
 import View from "./pages/View";
 import Navbar from "./components/Navbar";
+import { Toaster } from 'sonner'
+import AuthPage from "./pages/auth/AuthPage";
+import { Settings} from "./pages/Settings";
+
 
 const App = () => {
   const { pathname } = useLocation();
@@ -18,6 +22,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <Toaster />
       {!hideNavbar && <Navbar />}
 
       <Routes>
@@ -29,6 +34,9 @@ const App = () => {
         <Route path="/preview/:projectId/:versionId" element={<Preview />} />
         <Route path="/community" element={<Community />} />
         <Route path="/view/:projectId" element={<View />} />
+        <Route path="/auth/:pathname" element={<AuthPage />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/account/settings" element={<Settings />} />
       </Routes>
     </div>
   );
