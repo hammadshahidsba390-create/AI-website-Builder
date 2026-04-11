@@ -1,18 +1,9 @@
 import { X } from 'lucide-react';
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+import type { SelectedElement } from '../types';
+
 interface EditorPanelProps {
-  selectedElement: {
-    tagName: string;
-    className: string;
-    text: string;
-    styles: {
-      padding: string;
-      margin: string;
-      backgroundColor: string;
-      color: string;
-      fontSize: string;
-    }
-  } | null;
+  selectedElement: SelectedElement | null;
   onUpdate: (updates: Record<string, unknown>) => void;
   onClose: () => void;
 }

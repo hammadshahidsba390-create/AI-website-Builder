@@ -1,5 +1,5 @@
 import { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 'react'
-import type { Project } from '../types'
+import type { Project, SelectedElement } from '../types'
 import { iframeScript } from '../assets/assets';
 import EditorPanel from './EditorPanel';
 
@@ -18,7 +18,7 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
     ({ project, isGenerating, device = 'desktop', showEditorPanel = true }, ref) => {
 
         const iframeRef = useRef<HTMLIFrameElement>(null)
-        const [selectedElemnt, setSelectedElement] = useState<unknown>(null)
+        const [selectedElemnt, setSelectedElement] = useState<SelectedElement | null>(null)
 
         const resolutions = {
             phone: 'w-[412px]',

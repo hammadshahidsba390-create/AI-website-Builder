@@ -7,6 +7,19 @@ export interface User {
     image?: string;
 }
 
+export interface SelectedElement {
+    tagName: string;
+    className: string;
+    text: string;
+    styles: {
+        padding: string;
+        margin: string;
+        backgroundColor: string;
+        color: string;
+        fontSize: string;
+    }
+}
+
 export interface Message {
     id: string;
     role: 'user' | 'assistant';
