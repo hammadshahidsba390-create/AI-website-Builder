@@ -10,19 +10,19 @@ const View = () => {
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(true)
 
+  const fetchCode = async () => {
+    const code = dummyProjects.find(project => project.id === projectId)?.
+      current_code;
+    setTimeout(() => {
+      if (code) {
+        setCode(code);
+        setLoading(false)
+      }
+    }, 2000)
+  }
   useEffect(() => {
-    const fetchCode = async () => {
-      const foundCode = dummyProjects.find(project => project.id === projectId)?.
-        current_code;
-      setTimeout(() => {
-        if (foundCode) {
-          setCode(foundCode);
-          setLoading(false)
-        }
-      }, 2000)
-    }
     fetchCode()
-  }, [projectId])
+  }, [])
 
   if (loading) {
     return (

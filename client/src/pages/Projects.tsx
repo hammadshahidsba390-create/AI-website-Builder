@@ -36,26 +36,23 @@ const Projects = () => {
 
   const previewRef = useRef<ProjectPreviewRef>(null)
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      const foundProject = dummyProjects.find(
-        (project) => project.id === projectId
-      );
+  const fetchProject = async () => {
+    const foundProject = dummyProjects.find(
+      (project) => project.id === projectId
+    );
 
-      setTimeout(() => {
-        if (foundProject) {
-          setProject({
-            ...foundProject,
-            conversation: dummyConversations,
-            versions: dummyVersion
-          });
-          setIsGenerating(foundProject.current_code ? false : true);
-        }
-        setLoading(false); // ✅ Always stop loading
-      }, 2000);
-    };
-    fetchProject();
-  }, [projectId]);
+    setTimeout(() => {
+      if (foundProject) {
+        setProject({
+          ...foundProject,
+          conversation: dummyConversations,
+          versions: dummyVersion
+        });
+        setIsGenerating(foundProject.current_code ? false : true);
+      }
+      setLoading(false); // ✅ Always stop loading
+    }, 2000);
+  };
 
   const saveproject = async () => {
 
@@ -80,6 +77,9 @@ const Projects = () => {
   const togglepublish = async () => {
 
   }
+  useEffect(() => {
+    fetchProject();
+  }, []);
 
   if (loading) {
     return (
