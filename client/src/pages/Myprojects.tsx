@@ -4,27 +4,59 @@ import { Loader2Icon, PlusIcon, TrashIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { dummyProjects } from "../assets/assets";
 import Footer from "../components/Footer";
+import api from "@/configs/axios";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 const Myprojects = () => {
+  const {data:session,isPending}=authClient.useSession();
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const navigate = useNavigate();
 
   const fetchProjects = async () => {
-    setProjects(dummyProjects);
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 800);
+   try{
+    const {data}=await api.get('/api/user/projects')
+    setProjects(data.projects)
+    setLoading(false)
+   }catch(error:any){
+    console.log(error);
+    toast.error(error?.response?.data?.message || error.message);
+   }
   };
 
-  const deleteProject = (projectId: string) => {
-    setProjects((prev) => prev.filter((p) => p.id !== projectId));
+  const togglePublish = async (projectId: string) => {
+    try {
+      const { data } = await api.get(`/api/user/publish-toggle/${projectId}`);
+      toast.success(data.message);
+      fetchProjects();
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || error.message);
+    }
+  };
+
+  const deleteProject = async (projectId: string) => {
+    try {
+      const confirm = window.confirm('Are you sure you want to delete this project? This action cannot be undone.');
+      if (!confirm) return;
+      const { data } = await api.delete(`/api/project/${projectId}`);
+      toast.success(data.message);
+      fetchProjects();
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || error.message);
+    }
   };
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if(session?.user && !isPending){
+      fetchProjects();
+    }else if(!isPending && !session?.user){
+      navigate('/');
+      toast('please login to view your projects')
+    }
+  }, [session?.user]);
 
   return (
     <>
@@ -75,6 +107,11 @@ const Myprojects = () => {
                         <p>No Preview</p>
                       </div>
                     )}
+                    
+                    {/* Status Badge */}
+                    <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider ${project.isPublished ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-gray-800/80 text-gray-400 border border-gray-700'}`}>
+                      {project.isPublished ? 'Published' : 'Private'}
+                    </div>
                   </div>
 
                   {/* Info */}
@@ -96,23 +133,27 @@ const Myprojects = () => {
                         {new Date(project.createdAt).toLocaleDateString()}
                       </span>
 
-                      <div className="flex gap-3 text-sm">
+                      <div className="flex gap-2 text-sm">
                         <button
-                          onClick={() =>
-                            navigate(`/preview/${project.id}`)
-                          }
-                          className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-md transition"
+                          onClick={() => togglePublish(project.id)}
+                          className={`px-3 py-1.5 rounded-md transition ${project.isPublished ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-green-600/20 hover:bg-green-600/30 text-green-400 border border-green-600/30'}`}
                         >
-                          Preview
+                          {project.isPublished ? 'Unpublish' : 'Publish'}
                         </button>
 
                         <button
-                          onClick={() =>
-                            navigate(`/projects/${project.id}`)
-                          }
-                          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 rounded-md transition"
+                          onClick={() => window.open(`/view/${project.id}`, '_blank')}
+                          className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-md transition"
+                          title="Open in New Tab"
                         >
-                          Open
+                          View
+                        </button>
+
+                        <button
+                          onClick={() => navigate(`/projects/${project.id}`)}
+                          className="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-600/30 rounded-md transition"
+                        >
+                          Edit
                         </button>
                       </div>
                     </div>

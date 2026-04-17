@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
 import openai from '../configs/openai.js';
+import { createChatCompletionWithFallback, extractHTML } from './UserController.js';
 
 // controller function to make Revesion 
 
@@ -49,9 +50,7 @@ export const makeRevision=async (req: Request, res: Response)=>{
          })
 
          //Enhance  user prompt
-         const promptEnhanceResponse=await openai.chat.completions.create({
-            model:'z-ai/glm-4.5-air:free',
-            messages:[
+         const promptEnhanceResponse=await createChatCompletionWithFallback([
                 {
                     role:'system',
                     content: `
@@ -69,9 +68,7 @@ export const makeRevision=async (req: Request, res: Response)=>{
                     role:'user',
                     content: `User's request: "${message}"`
                }
-            ]
-                
-         })
+            ]);
 
          const enhancePrompt=promptEnhanceResponse.choices[0].message.content;
 
@@ -92,9 +89,7 @@ export const makeRevision=async (req: Request, res: Response)=>{
          })
 
          // Generate website code
-         const codeGenerationResponse=await openai.chat.completions.create({
-            model:'z-ai/glm-4.5-air:free',
-            messages:[
+         const codeGenerationResponse=await createChatCompletionWithFallback([
                 {
                     role:'system',
                     content: `
@@ -107,6 +102,8 @@ export const makeRevision=async (req: Request, res: Response)=>{
                     - Include all JavaScript in <script> tags before closing </body>
                     - Make sure it's a complete, standalone HTML document with Tailwind CSS
                     - Return the HTML Code Only, nothing else
+                    - Absolutely NO text, symbols, or hidden tags (like <thinking> or <reasoning>) before or after the code.
+                    - Start your response IMMEDIATELY with <!DOCTYPE html> or <html.
 
                     Apply the requested changes while maintaining the Tailwind CSS styling approach.`
                 },
@@ -116,16 +113,29 @@ export const makeRevision=async (req: Request, res: Response)=>{
                     Here is the current website code: "${currentProject.current_code}"
                     The user wants this change: "${enhancePrompt}"`
                 }
-            ]
-         })
+            ]);
 
          const code=codeGenerationResponse.choices[0].message.content || '';
 
+         if(!code){
+            await prisma.conversation.create({
+                data:{
+                    role:'assistant',
+                    content: `Unable to generate code ,please try again.`,
+                    projectId
+                }
+            }),
+                await prisma.user.update({
+                    where:{id:userId},
+                    data:{credits:{increment:5}}
+                })
+                return;
+         }
+
+         const cleanedCode = extractHTML(code);
          const version= await prisma.version.create({
             data:{
-                code:code.replace(/```[a-z]*\n?/gi,'')
-                .replace(/```$/g,'')
-                .trim(),
+                code: cleanedCode,
                 description:'changes made',
                 projectId
                 
@@ -143,9 +153,7 @@ export const makeRevision=async (req: Request, res: Response)=>{
          await prisma.websiteProject.update({
             where:{id:projectId},
             data:{
-                current_code:code.replace(/```[a-z]*\n?/gi,'')
-                .replace(/```$/g,'')
-                .trim(),
+                current_code: cleanedCode,
                current_version_index:version.id
             }
          })
