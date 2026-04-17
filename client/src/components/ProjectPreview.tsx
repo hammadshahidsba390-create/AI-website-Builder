@@ -2,6 +2,8 @@ import { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 're
 import type { Project } from '../types'
 import { iframeScript } from '../assets/assets';
 import EditorPanel from './EditorPanel';
+import { Loader } from 'lucide-react';
+import LoaderSteps from './LoaderSteps';
 
 interface ProjectPreviewProps {
     project: Project;
@@ -110,7 +112,7 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
                         )}
                     </>
                 ) : isGenerating && (
-                    <div>loading</div>
+                    <LoaderSteps/>
                 )}
             </div>
         )

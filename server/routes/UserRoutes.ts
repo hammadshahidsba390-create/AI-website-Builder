@@ -4,7 +4,7 @@ import { protect } from '../middleware/auth.js';
 
 const userRouter=express.Router();
 
-userRouter.get('credits', protect, getusercredits)
+userRouter.get('/credits', protect, getusercredits)
 userRouter.post('/project', protect, createUserProject)
 userRouter.get('/project/:projectId', protect, getUserProject)
 userRouter.get('/projects',protect,getUserProjects)
