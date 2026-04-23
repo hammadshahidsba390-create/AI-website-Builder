@@ -1,4 +1,9 @@
 {
+change
+  "functions": {
+    "server/server.ts": {
+      "maxDuration": 30
+
   "version": 2,
   "builds": [
     {
@@ -29,18 +34,23 @@ vercel-changes-for-deployment-to-deduct-error
       "config": {
         "distDir": "client/dist"
       }
+ main
     }
-  ],
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "server/server.ts"
+      "destination": "/server/server.ts"
     },
     {
       "source": "/((?!api/).*)",
+change
+      "destination": "/client/dist/index.html"
+
       "destination": "/index.html"
 
       main
+ main
     }
   ]
 }
