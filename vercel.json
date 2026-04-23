@@ -1,7 +1,8 @@
 {
+  "version": 2,
   "functions": {
     "server/server.ts": {
-      "maxDuration": 30
+      "runtime": "@vercel/node"
     }
   },
   "rewrites": [
