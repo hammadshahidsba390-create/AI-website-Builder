@@ -17,7 +17,11 @@ change
       "destination": "/client/dist/index.html"
 
       "source": "/(.*)",
+ for-live-into-vercel
+      "destination": "/client/dist/$1"
+
       "destination": "/client/$1"
+ main
  main
     }
   ],
