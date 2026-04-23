@@ -1,5 +1,28 @@
 {
   "version": 2,
+ change
+
+  "builds": [
+    {
+      "src": "server/server.ts",
+      "use": "@vercel/node@latest"
+    },
+    {
+ vercel-changes-for-deployment-to-deduct-error
+ vercel-changes-for-deployment-to-deduct-error
+      "source": "/((?!api/).*)",
+      "destination": "/client/dist/index.html"
+
+      "source": "/(.*)",
+ for-live-into-vercel
+      "destination": "/client/dist/$1"
+
+      "destination": "/client/$1"
+ main
+ main
+    }
+  ],
+ main
   "functions": {
     "server/server.ts": {
       "runtime": "@vercel/node"
