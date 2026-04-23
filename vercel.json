@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/server.ts"
+      "src": "server/server.ts",
+      "use": "@vercel/node@latest"
     },
     {
+ vercel-changes-for-deployment-to-deduct-error
  vercel-changes-for-deployment-to-deduct-error
       "source": "/((?!api/).*)",
       "destination": "/client/dist/index.html"
@@ -22,6 +23,24 @@ vercel-changes-for-deployment-to-deduct-error
 
       "runtime": "@vercel/node"
  main
+
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "client/dist"
+      }
     }
-  }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "server/server.ts"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+
+      main
+    }
+  ]
 }
