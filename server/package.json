@@ -7,8 +7,12 @@
   "scripts": {
     "start": "tsx server.ts",
     "server": "nodemon --exec tsx server.ts",
+ for-live-into-vercel
+    "build": "prisma generate && tsc"
+
     "build": "tsc",
     "postinstall": "npx prisma generate"
+main
   },
   "keywords": [],
   "author": "",
@@ -22,7 +26,11 @@
     "express": "^4.22.1",
     "openai": "^6.34.0",
     "pg": "^8.20.0",
+ for-live-into-vercel
+    "resend": "^6.12.2"
+
     "stripe": "^22.0.2"
+ main
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

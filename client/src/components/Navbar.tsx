@@ -12,6 +12,35 @@ const Navbar = () => {
   const navigate = useNavigate()
   const [credits, setCredits] = useState(0)
 
+ for-live-into-vercel
+  const{data:session}=authClient.useSession() 
+  const [credits, setCredits] = React.useState<number | null>(null);
+
+  const fetchCredits = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASEURL}/api/user/credits`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Better auth uses cookies, so we need to include them
+        //@ts-ignore
+        credentials: 'include',
+      });
+      const data = await response.json();
+      if (data.credits !== undefined) {
+        setCredits(data.credits);
+      }
+    } catch (error) {
+      console.error('Error fetching credits:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (session?.user) {
+      fetchCredits();
+    }
+  }, [session]);
+
   const { data: session } = authClient.useSession()
 
   const getCredits = async () => {
@@ -30,6 +59,7 @@ const Navbar = () => {
       getCredits()
     }
   }, [session?.user])
+main
 
   return (
     <>
@@ -47,6 +77,30 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
+for-live-into-vercel
+        {!session?.user ? (
+           <button onClick={() => navigate('/auth/signin')} className="px-6 py-1.5 max-sm:text-sm bg-indigo-600 active:scale-95 hover:bg-indigo-700 transition rounded">
+            Get started
+          </button>
+        ):(
+          <div className="flex items-center gap-3">
+             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-800/50 border border-slate-700 rounded-full text-sm font-medium text-slate-300">
+               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><path d="M6 3h12l4 6-10 13L2 9Z"/></svg>
+               {credits !== null ? credits : '...'}
+             </div>
+             <UserButton size='icon' />
+          </div>
+        )
+          
+         }
+          <button
+            type="button"
+            id="open-menu"
+            className="md:hidden active:scale-90 transition"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+          >
+
           {!session?.user ? (
             <button onClick={() => navigate('/auth/signin')} className="px-6 py-1.5 max-sm:text-sm bg-indigo-600 active:scale-95 hover:bg-indigo-700 transition rounded">
               Get started
@@ -62,6 +116,7 @@ const Navbar = () => {
 
           }
           <button id="open-menu" type="button" title="Open menu" className="md:hidden active:scale-90 transition" onClick={() => setMenuOpen(true)} >
+main
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" /></svg>
           </button>
         </div>
@@ -75,7 +130,16 @@ const Navbar = () => {
           <Link to="/Community" onClick={() => setMenuOpen(false)}>Community</Link>
           <Link to="/Pricing" onClick={() => setMenuOpen(false)}>Pricing</Link>
 
+ for-live-into-vercel
+          <button
+            type="button"
+            className="active:ring-3 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-slate-100 hover:bg-slate-200 transition text-black rounded-md flex"
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+          >
+
           <button type="button" title="Close menu" className="active:ring-2 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-slate-100 hover:bg-slate-200 transition text-black rounded-md flex" onClick={() => setMenuOpen(false)} >
+ main
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
           </button>
         </div>

@@ -4,10 +4,13 @@ import { protect } from '../middleware/auth.js';
 
 const userRouter = express.Router();
 
+ for-live-into-vercel
+
 controllers-or-stripe-add
 userRouter.get('/credits', protect, getusercredits);
 userRouter.post('/purchase-credits', protect, purchaseCredits);
 
+ main
 userRouter.get('/credits', protect, getusercredits)
 userRouter.post('/project', protect, createUserProject)
 userRouter.get('/project/:projectId', protect, getUserProject)
