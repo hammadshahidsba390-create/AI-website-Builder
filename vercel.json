@@ -6,6 +6,24 @@
       "use": "@vercel/node@latest"
     },
     {
+ vercel-changes-for-deployment-to-deduct-error
+ vercel-changes-for-deployment-to-deduct-error
+      "source": "/((?!api/).*)",
+      "destination": "/client/dist/index.html"
+
+      "source": "/(.*)",
+      "destination": "/client/$1"
+ main
+    }
+  ],
+  "functions": {
+    "server/server.ts": {
+vercel-changes-for-deployment-to-deduct-error
+      "runtime": "nodejs20.x"
+
+      "runtime": "@vercel/node"
+ main
+
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -21,6 +39,8 @@
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
+
+      main
     }
   ]
 }
