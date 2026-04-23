@@ -1,20 +1,35 @@
 import { useEffect, useState } from "react";
 import type { Project } from "../types";
-import { Loader2Icon, PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { dummyProjects } from "../assets/assets";
+import { api } from "../lib/api";
+import { toast } from "sonner";
 import Footer from "../components/Footer";
+controllers-or-stripe-add
+import { useSession } from "../lib/auth-client";
+
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+ main
 
 const Myprojects = () => {
   const {data:session,isPending}=authClient.useSession();
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const navigate = useNavigate();
+  const { data: session, isPending: sessionPending } = useSession();
 
   const fetchProjects = async () => {
+controllers-or-stripe-add
+    try {
+      const { data } = await api.get('/api/projects');
+      setProjects(data.projects);
+    } catch (error) {
+      toast.error('Failed to load projects');
+    } finally {
+      setLoading(false);
+
    try{
     const {data}=await api.get('/api/user/projects')
     setProjects(data.projects)
@@ -33,11 +48,19 @@ const Myprojects = () => {
     } catch (error: any) {
       console.log(error);
       toast.error(error?.response?.data?.message || error.message);
+ main
     }
   };
 
   const deleteProject = async (projectId: string) => {
     try {
+controllers-or-stripe-add
+      await api.delete(`/api/projects/${projectId}`);
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+      toast.success('Project deleted');
+    } catch (error) {
+      toast.error('Failed to delete project');
+
       const confirm = window.confirm('Are you sure you want to delete this project? This action cannot be undone.');
       if (!confirm) return;
       const { data } = await api.delete(`/api/project/${projectId}`);
@@ -46,10 +69,19 @@ const Myprojects = () => {
     } catch (error: any) {
       console.log(error);
       toast.error(error?.response?.data?.message || error.message);
+ main
     }
   };
 
   useEffect(() => {
+ controllers-or-stripe-add
+    if (session) {
+      fetchProjects();
+    } else if (!sessionPending) {
+      setLoading(false);
+    }
+  }, [session, sessionPending]);
+
     if(session?.user && !isPending){
       fetchProjects();
     }else if(!isPending && !session?.user){
@@ -57,13 +89,22 @@ const Myprojects = () => {
       toast('please login to view your projects')
     }
   }, [session?.user]);
+ main
 
   return (
     <>
       <div className="px-4 md:px-16 lg:px-24 xl:px-32 bg-black min-h-screen text-white">
-        {loading ? (
-          <div className="flex items-center justify-center h-[80vh]">
-            <Loader2Icon className="size-7 animate-spin text-indigo-400" />
+        {loading || sessionPending ? (
+          <div className="py-12 min-h-[80vh]">
+             <div className="flex items-center justify-between mb-10">
+                <div className="h-10 w-48 bg-gray-800 animate-pulse rounded-lg" />
+                <div className="h-10 w-32 bg-gray-800 animate-pulse rounded-lg" />
+             </div>
+             <div className="flex flex-wrap gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="w-80 h-80 bg-gray-900 border border-gray-800 rounded-xl overflow-hidden animate-shimmer" />
+                ))}
+             </div>
           </div>
         ) : projects.length > 0 ? (
           <div className="py-12 min-h-[80vh]">
@@ -171,6 +212,21 @@ const Myprojects = () => {
                 </div>
               ))}
             </div>
+          </div>
+        ) : !session ? (
+          <div className="flex flex-col items-center justify-center h-[80vh] text-center">
+            <h1 className="text-3xl font-semibold text-gray-300">
+              Login Required
+            </h1>
+             <p className="text-gray-500 mt-4 max-w-md">
+               Please log in to view and manage your AI-generated website projects.
+             </p>
+             <button
+               onClick={() => navigate("/")}
+               className="mt-8 px-8 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 font-medium transition active:scale-95"
+             >
+               Return Home to Login
+             </button>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-[80vh]">

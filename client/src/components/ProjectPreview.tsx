@@ -2,8 +2,12 @@ import { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 're
 import type { Project } from '../types'
 import { iframeScript } from '../assets/assets';
 import EditorPanel from './EditorPanel';
+ controllers-or-stripe-add
+import { Loader2Icon } from 'lucide-react';
+
 import { Loader } from 'lucide-react';
 import LoaderSteps from './LoaderSteps';
+main
 
 interface ProjectPreviewProps {
     project: Project;
@@ -90,13 +94,13 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
         }
 
         return (
-            <div className='relative h-full bg-gray-900 flex-1 rounded-xl overflow-hidden max-sm:ml-2'>
+            <div className='relative h-full bg-[#050505] flex-1 overflow-hidden transition-all duration-700 ease-in-out'>
                 {project.current_code ? (
                     <>
                         <iframe
                             ref={iframeRef}
                             srcDoc={injectPreview(project.current_code)}
-                            className={`h-full max-sm:w-full ${resolutions[device]} mx-auto transition-all`}
+                            className={`h-full max-sm:w-full ${resolutions[device]} mx-auto transition-all shadow-[0_0_80px_rgba(0,0,0,0.5)] border-x border-white/5`}
                         />
                         {showEditorPanel && selectedElemnt && (
                             <EditorPanel selectedElement={selectedElemnt}
@@ -112,7 +116,16 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
                         )}
                     </>
                 ) : isGenerating && (
+controllers-or-stripe-add
+                    <div className="flex flex-col items-center justify-center h-full bg-black/40 animate-pulse">
+                        <div className="size-12 rounded-2xl bg-indigo-600/20 flex items-center justify-center mb-4">
+                           <Loader2Icon className="size-6 animate-spin text-indigo-400" />
+                        </div>
+                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">Materializing Components...</p>
+                    </div>
+
                     <LoaderSteps/>
+ main
                 )}
             </div>
         )

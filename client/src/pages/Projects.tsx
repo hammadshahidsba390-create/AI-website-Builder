@@ -15,16 +15,27 @@ import {
   TabletIcon,
   XIcon,
 } from "lucide-react";
+ controllers-or-stripe-add
+import { api } from "../lib/api";
+import { toast } from "sonner";
+import ProjectPreview, { type ProjectPreviewRef } from "../components/ProjectPreview";
+import { useSession } from "../lib/auth-client";
+
 import ProjectPreview, { type ProjectPreviewRef } from "../components/ProjectPreview";
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+ main
 
 
 const Projects = () => {
   const { projectId } = useParams(); // ✅ FIXED
   const navigate = useNavigate();
+ controllers-or-stripe-add
+  const { data: session, isPending: sessionPending } = useSession();
+
   const { data: session ,isPending } = authClient.useSession();
+ main
 
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +52,38 @@ const Projects = () => {
 
   const fetchProject = async () => {
     try {
+ controllers-or-stripe-add
+      const { data } = await api.get(`/api/projects/${projectId}`);
+      setProject(data.project);
+      
+      const generating = !data.project.current_code;
+      setIsGenerating(generating);
+      
+      if (generating) {
+        // Polling if still generating
+        setTimeout(fetchProject, 5000);
+      }
+    } catch (error: any) {
+      toast.error("Failed to load project");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveproject = async () => {
+    if (!project || isSaving) return;
+    setIsSaving(true);
+    try {
+      const currentCode = previewRef.current?.getCode() || project.current_code;
+      await api.post(`/api/projects/${projectId}/save`, { code: currentCode });
+      toast.success("Project saved");
+    } catch (error) {
+      toast.error("Failed to save project");
+    } finally {
+      setIsSaving(false);
+    }
+
       const {data} = await api.get(`/api/user/project/${projectId}`)
       setProject(data.project)
       setIsGenerating(data.project.current_code ? false : true)
@@ -66,6 +109,7 @@ const Projects = () => {
         setIsSaving(false)
       }
 
+ main
   };
   // download code (index.html)
   const downloadcode = () => {
@@ -85,6 +129,23 @@ const Projects = () => {
   }
 
   const togglepublish = async () => {
+controllers-or-stripe-add
+    try {
+      const { data } = await api.get(`/api/projects/${projectId}/toggle-publish`);
+      setProject(prev => prev ? { ...prev, isPublished: data.isPublished } : null);
+      toast.success(data.message);
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
+  };
+  useEffect(() => {
+    if (session) {
+      fetchProject();
+    } else if (!sessionPending) {
+        setLoading(false);
+    }
+  }, [session, sessionPending]);
+
     try{
         const {data}=await api.get(`/api/user/publish-toggle/${projectId}`)
         toast.success(data.messsage)
@@ -110,10 +171,11 @@ const Projects = () => {
       return () => clearInterval(intervalId);
     }
   }, [project]);
+ main
 
-  if (loading) {
+  if (loading || sessionPending) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-black">
         <Loader2Icon className="size-7 animate-spin text-violet-200" />
       </div>
     );
@@ -224,10 +286,25 @@ const Projects = () => {
         </div>
       </div>
     </div>
+  ) : !session ? (
+     <div className="flex flex-col items-center justify-center h-screen bg-black text-center px-4">
+        <h1 className="text-3xl font-semibold text-gray-200">
+          Login Required
+        </h1>
+        <p className="text-gray-500 mt-4 max-w-sm">
+          You must be logged in to access the website builder and view your projects.
+        </p>
+        <button
+          onClick={() => navigate("/")}
+          className="mt-8 px-8 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 font-medium transition"
+        >
+          Go Back Home
+        </button>
+     </div>
   ) : (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-screen bg-black">
       <p className="text-2xl font-medium text-gray-200">
-        Unable to load project
+        Project not found
       </p>
     </div>
   );

@@ -1,5 +1,15 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
+controllers-or-stripe-add
+import Stripe from 'stripe';
+
+// Get user credits 
+export const getusercredits = async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId;
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized user' })
+
 import { int } from 'better-auth';
 import OpenAI from 'openai';
 import openai from '../configs/openai.js';
@@ -146,34 +156,64 @@ export const getusercredits=async (req: Request, res: Response)=>{
         const userId=req.userId;
         if(!userId){
             return res.status(401).json({message:'Unauthorized user'})
+ main
         }
-        const user=await prisma.user.findUnique({
-            where:{id:userId}
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
         })
-        res.json({credits:user?.credits})
-    }catch(error:any){
-        console.log(error.code|| error.message);
-        res.status(500).json({message:error.code|| error.message});
+        res.json({ credits: user?.credits })
+    } catch (error: any) {
+        console.log(error.code || error.message);
+        res.status(500).json({ message: error.code || error.message });
     }
-
 }
 
-// Controller function  to create a new project 
-
-export const createUserProject=async (req: Request, res: Response)=>{
-    const userId=req.userId;
-    try{
-        const{initial_prompt}=req.body;
-        if(!userId){
-            return res.status(401).json({message:'Unauthorized user'})
+// controller function to purchase credits
+export const purchaseCredits = async (req: Request, res: Response) => {
+    try {
+        interface Plan {
+            credits: number;
+            amount: number;
         }
-        const user=await prisma.user.findUnique({
-            where:{id:userId}
+        const plans = {
+            basic: { credits: 100, amount: 5 },
+            pro: { credits: 400, amount: 19 },
+            Enterprise: { credits: 1000, amount: 49 }
+        }
+        const userId = req.userId;
+        const { planId } = req.body as { planId: keyof typeof plans };
+        const origin = req.headers.origin as string;
+
+ controllers-or-stripe-add
+        const plan: Plan = plans[planId];
+
+        if (!plan) {
+            return res.status(400).json({ message: 'Plan not found' })
+        }
+        
+        const transaction = await prisma.transaction.create({
+            data: {
+                userId: userId!,
+                planId: req.body.planId,
+                amount: plan.amount,
+                credits: plan.credits
+            }
         })
-
-        if(user && user.credits<5){
-            return res.status(403).json({message:'Insufficient credits'})
-        }
+        
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+        const session = await stripe.checkout.sessions.create({
+            success_url: `${origin}/loading`,
+            cancel_url: `${origin}`,
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: `AiSiteBuilder-${plan.credits} Credits`
+                        },
+                        unit_amount: Math.floor(transaction.amount * 100)
+                    },
+                    quantity: 1
 
         // create a new project
         const project=await prisma.websiteProject.create({
@@ -367,85 +407,20 @@ export const getUserProject=async (req: Request, res: Response)=>{
             include:{
                 conversation:{
                     orderBy:{timestamp:'asc'}
+ main
                 },
-                versions:{orderBy:{timestamp:'asc'}}
-            }
-        })
+            ],
+            mode: 'payment',
+            metadata: {
+                transactionId: transaction.id,
+                appId: 'ai-site-builder'
+            },
+            expires_at: Math.floor(Date.now() / 1000) + 30 * 60  //Expires in 30 minutes
+        });
 
-       
-        res.json({project}
-
-        )
-    }catch(error:any){
-        console.log(error.code|| error.message);
-        res.status(500).json({message:error.code|| error.message});
+        res.json({ payment_link: session.url })
+    } catch (error: any) {
+        console.log(error.code || error.message);
+        res.status(500).json({ message: error.message });
     }
-
-}
-
-//controller function to get all user projects
-
-export const getUserProjects=async (req: Request, res: Response)=>{
-    try{
-        const userId=req.userId;
-        if(!userId){
-            return res.status(401).json({message:'Unauthorized user'})
-        }
-
-        const projects =await prisma.websiteProject.findMany({
-            where:{userId},
-            orderBy:{updatedAt:'desc'},
-        })
-
-        res.json({projects}
-
-        )
-    }catch(error:any){
-        console.log(error.code|| error.message);
-        res.status(500).json({message:error.code|| error.message});
-    }
-
-}
-
-//controller function to toggle project publish/unpublish status
-
-export const togglePublish=async (req: Request, res: Response)=>{
-    try{
-        const userId=req.userId;
-        if(!userId){
-            return res.status(401).json({message:'Unauthorized user'})
-        }
-
-        const {projectId}=req.params;
-
-        const project =await prisma.websiteProject.findUnique({
-            where:{id:projectId, userId},
-        })
-
-        if (!project){
-            return res.status(404).json({message:'Project not found'})
-        }
-
-        await prisma.websiteProject.update({
-            where:{id:projectId},
-            data:{isPublished:!project.isPublished}
-        })
-       
-        res.json({message:project.isPublished ? 'project Unpublished'
-            :'project Published successfully'})
-
-
-    }catch(error:any){
-        console.log(error.code|| error.message);
-        res.status(500).json({message:error.code|| error.message});
-    }
-
-}
-
-// controller function to purchase credits
-
-export const purchaseCredits=async (req: Request, res: Response)=>{
-   
-      
-
 }

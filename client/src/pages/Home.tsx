@@ -1,3 +1,12 @@
+ controllers-or-stripe-add
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
+import { toast } from 'sonner';
+import { Loader2Icon } from 'lucide-react';
+
+const Home = () => {
+
 import api from '@/configs/axios';
 import { authClient } from '@/lib/auth-client';
 import { Loader2Icon } from 'lucide-react';
@@ -10,12 +19,29 @@ const Home = () => {
   const {data: session} = authClient.useSession()
   const navigate = useNavigate()
 
+ main
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
 
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
+ controllers-or-stripe-add
+    if (!input.trim() || loading) return;
+    
+    setLoading(true);
+    try {
+      const { data } = await api.post('/api/projects', { initial_prompt: input });
+      toast.success("Design started! Redirecting...");
+      navigate(`/projects/${data.projectId}`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to start generation");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+
     try{
       if(!session?.user){
         return toast.error("Please sign in to create a project ")
@@ -33,6 +59,7 @@ const Home = () => {
 
     }
 
+main
   };
 
   return (

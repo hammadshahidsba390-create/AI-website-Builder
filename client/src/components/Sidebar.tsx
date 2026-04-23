@@ -6,9 +6,14 @@ import {
   Loader2Icon,
   SendIcon,
   UserIcon,
+  Layout,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+ controllers-or-stripe-add
+import { api } from "../lib/api";
+
 import api from "@/configs/axios";
+ main
 import { toast } from "sonner";
 
 interface SidebarProps {
@@ -22,7 +27,10 @@ interface SidebarProps {
 const Sidebar = ({
   isMenuOpen,
   Project,
+controllers-or-stripe-add
+
   SetProject,
+ main
   isGenerating,
   setIsGenerating,
 }: SidebarProps) => {
@@ -41,6 +49,13 @@ const Sidebar = ({
 
   const handleRollback = async (versionId: string) => {
     try {
+ controllers-or-stripe-add
+      await api.post(`/api/projects/${Project.id}/rollback/${versionId}`);
+      toast.success('Rolled back successfully');
+      window.location.reload();
+    } catch {
+      toast.error('Rollback failed');
+
       const confirm=window.confirm("Are you sure you want to rollback to this version")
       if(!confirm)return;
       setIsGenerating(true)
@@ -53,10 +68,23 @@ const Sidebar = ({
       setIsGenerating(false)
       toast.error(error?.response?.data?.message || error.message);
       console.log(error);
+ main
     }
   };
+
   const handleRevesion = async (e: React.FormEvent) => {
     e.preventDefault()
+ controllers-or-stripe-add
+    if (!input.trim()) return;
+    setIsGenerating(true)
+    try {
+      await api.post(`/api/projects/${Project.id}/revision`, { message: input });
+      setInput("");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGenerating(false)
+
     let interval:number | undefined;
     try {
       setIsGenerating(true);
@@ -74,6 +102,7 @@ const Sidebar = ({
       toast.error(error?.response?.data?.message || error.message);
       console.log(error);
       clearInterval(interval);
+ main
     }
   }
 
@@ -85,12 +114,16 @@ const Sidebar = ({
 
   return (
     <div
-      className={`h-full sm:w-80 bg-gray-900 border-r border-gray-800 transition-all duration-300 
+      className={`h-full sm:w-85 backdrop-blur-xl bg-black/40 border-r border-white/10 transition-all duration-500 
       ${isMenuOpen ? 'max-sm:w-0 overflow-hidden' : "w-full"}`}
     >
       <div className="flex flex-col h-full">
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 flex flex-col gap-4">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-8 flex flex-col gap-6">
+          <div className="mb-4">
+             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 opacity-50">Operation Log</span>
+          </div>
+
           {[...Project.conversation, ...Project.versions]
             .sort(
               (a, b) =>
@@ -111,23 +144,23 @@ const Sidebar = ({
                       }`}
                   >
                     {!isUser && (
-                      <div className="w-8 h-8 rounded-full  from-indigo-500 to-indigo-600 flex items-center justify-center">
-                        <BotIcon className="size-5 text-white" />
+                      <div className="size-8 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <BotIcon className="size-4 text-white" />
                       </div>
                     )}
 
                     <div
-                      className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm leading-relaxed shadow ${isUser
-                        ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-tr-none"
-                        : " rounded-tl-none bg-gray-800 text-gray-100"
+                      className={`max-w-[85%] px-5 py-3 rounded-2xl text-[13px] leading-relaxed font-medium transition-all ${isUser
+                        ? "bg-indigo-600 text-white rounded-tr-none shadow-xl shadow-indigo-500/10"
+                        : "rounded-tl-none bg-white/5 border border-white/10 text-gray-200"
                         }`}
                     >
                       {msg.content}
                     </div>
 
                     {isUser && (
-                      <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                        <UserIcon className="size-5 text-gray-200" />
+                      <div className="size-8 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+                        <UserIcon className="size-4 text-gray-400" />
                       </div>
                     )}
                   </div>
@@ -138,36 +171,40 @@ const Sidebar = ({
                 return (
                   <div
                     key={ver.id}
-                    className="w-[85%] mx-auto p-3 rounded-xl bg-gray-800 text-gray-100 shadow flex flex-col gap-2"
+                    className="w-full p-4 rounded-3xl bg-white/5 border border-white/10 shadow-sm flex flex-col gap-4 group hover:border-indigo-500/30 transition-all"
                   >
-                    <div>
-
-                      Code updated<br />
-
-                      <span className="text-xs text-gray-400">
-                        {new Date(ver.timestamp).toLocaleString()}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 rounded-2xl bg-indigo-600/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                         <Layout size={18} />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-black text-white uppercase tracking-widest">Snapshot Created</p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                          {new Date(ver.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       {Project.current_version_index === ver.id ? (
-                        <button className="px-3 py-1 text-xs bg-gray-700 rounded-md">
-                          Current Version
-                        </button>
+                        <div className="flex-1 px-4 py-2 text-[10px] bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl font-black uppercase tracking-widest text-center">
+                          Active Branch
+                        </div>
                       ) : (
                         <button
                           onClick={() => handleRollback(ver.id)}
-                          className="px-3 py-1 text-xs bg-indigo-600 hover:bg-indigo-700 rounded-md text-white transition"
+                          className="flex-1 px-4 py-2 text-[10px] bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-indigo-500/20"
                         >
-                          Rollback to this version
+                          Rollback
                         </button>
                       )}
 
                       <Link
                         target="_blank"
                         to={`/preview/${Project.id}/${ver.id}`}
+                        className="size-10 flex items-center justify-center bg-white/5 border border-white/10 hover:border-indigo-500/30 rounded-xl transition-all"
                       >
-                        <EyeIcon className="size-6 p-1 bg-gray-700 hover:bg-indigo-600 rounded transition" />
+                        <EyeIcon className="size-4 text-gray-400 hover:text-white" />
                       </Link>
                     </div>
                   </div>
@@ -176,24 +213,14 @@ const Sidebar = ({
             })}
 
           {isGenerating && (
-            <div className="flex items-start gap-3 justify-start">
-              <div className="w-8 h-8 rounded-full bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-                <BotIcon className="size-5 text-white" />
+            <div className="flex items-start gap-3 justify-start animate-fade-in">
+              <div className="size-8 rounded-xl bg-indigo-600/20 flex items-center justify-center shadow-lg shadow-indigo-500/10">
+                <BotIcon className="size-4 text-indigo-400 animate-pulse" />
               </div>
-              {/*three dot loader */}
-              <div className="flex gap-1 h-full items-end">
-                <span
-                  className=" size-2 rounded-full animate-bounce"
-                  style={{ animationDelay: "0s" }}
-                />
-                <span
-                  className="size-2 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                />
-                <span
-                  className="size-2 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.4s" }}
-                />
+              <div className="bg-white/5 border border-white/10 px-5 py-3 rounded-2xl rounded-tl-none flex gap-1.5 h-full items-center">
+                <span className="size-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="size-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="size-1.5 bg-indigo-400 rounded-full animate-bounce" />
               </div>
             </div>
           )}
@@ -202,31 +229,29 @@ const Sidebar = ({
         </div>
 
         {/* Input Area */}
-        <form onSubmit={handleRevesion} className="m-3 relative">
-          <div className="flex items-center gap-2">
+        <div className="p-6 pt-2 border-t border-white/5 bg-black/20">
+          <form onSubmit={handleRevesion} className="relative">
             <textarea
-
               onChange={(e) => setInput(e.target.value)}
               value={input}
-              rows={4}
-              placeholder="Describe your website or request changes..."
-              className="flex-1 p-3 rounded-xl resize-none text-sm outline-none bg-gray-800 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 transition"
+              rows={3}
+              placeholder="Inject new directives..."
+              className="w-full p-5 pr-14 rounded-[2rem] resize-none text-[13px] font-medium outline-none bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-indigo-500/50 transition-all shadow-inner"
               disabled={isGenerating}
             />
 
-            <button disabled={isGenerating || !input.trim()}
-              className="absolute bottom-2.5 right-2.5 rounded-full
-            bg-linear-to-r from-indigo-600 hover:from-indigo-600 hover:to-indigo-700
-            text-white transition-colors disabled:opacity-60">
-
+            <button 
+              disabled={isGenerating || !input.trim()}
+              className="absolute bottom-3 right-3 size-11 rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition-all disabled:opacity-30 active:scale-90 shadow-xl shadow-indigo-500/30"
+            >
               {isGenerating ? (
-                <Loader2Icon className="size-7 animate-spin text-white" />
+                <Loader2Icon className="size-5 animate-spin" />
               ) : (
-                <SendIcon className="size-7 text-white" />
+                <SendIcon className="size-5" />
               )}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
