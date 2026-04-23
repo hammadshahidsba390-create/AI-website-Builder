@@ -1,16 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, version } from "react";
 import { useParams } from "react-router-dom";
 import { Loader2Icon } from "lucide-react";
 import ProjectPreview from "../components/ProjectPreview";
+ controllers-or-stripe-add
 import type { Project } from "../types";
 import { api } from "../lib/api";
 
 const Preview = () => {
+
+import type { Project, Version } from "../types";
+import api from "@/configs/axios";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
+
+const Preview = () => {
+
+  const {data:session,isPending}=authClient.useSession();
+ main
   const { projectId, versionId } = useParams()
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(true);
 
   const fetchCode = async () => {
+ controllers-or-stripe-add
     try {
       const { data } = await api.get(`/api/projects/public/${projectId}`);
       
@@ -29,12 +41,31 @@ const Preview = () => {
       console.error('Failed to load preview:', error);
     } finally {
       setLoading(false);
+
+    try{
+      const {data}=await api.get(`/api/project/preview/${projectId}`);
+      setCode(data.project.current_code);
+      if(versionId){
+        data.project.version.forEach((versio:Version)=>{
+          if(versio.id===versionId){
+            setCode(versio.code)
+          }
+        })
+      }
+      setLoading(false)
+    }catch(error:any){
+      toast.error(error?.response?.data?.message || error.message)
+      console.log(error);
+ main
     }
   }
 
   useEffect(() => {
-    fetchCode()
-  }, [])
+    if(!isPending && session?.user){
+      fetchCode()
+    }
+    
+  }, [session?.user])
 
   if (loading) {
     return (

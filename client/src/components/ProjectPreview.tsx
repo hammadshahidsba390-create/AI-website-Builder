@@ -2,7 +2,12 @@ import { forwardRef, useRef, useImperativeHandle, useState, useEffect } from 're
 import type { Project } from '../types'
 import { iframeScript } from '../assets/assets';
 import EditorPanel from './EditorPanel';
+ controllers-or-stripe-add
 import { Loader2Icon } from 'lucide-react';
+
+import { Loader } from 'lucide-react';
+import LoaderSteps from './LoaderSteps';
+main
 
 interface ProjectPreviewProps {
     project: Project;
@@ -111,12 +116,16 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
                         )}
                     </>
                 ) : isGenerating && (
+controllers-or-stripe-add
                     <div className="flex flex-col items-center justify-center h-full bg-black/40 animate-pulse">
                         <div className="size-12 rounded-2xl bg-indigo-600/20 flex items-center justify-center mb-4">
                            <Loader2Icon className="size-6 animate-spin text-indigo-400" />
                         </div>
                         <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">Materializing Components...</p>
                     </div>
+
+                    <LoaderSteps/>
+ main
                 )}
             </div>
         )

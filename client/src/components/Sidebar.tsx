@@ -9,7 +9,11 @@ import {
   Layout,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+ controllers-or-stripe-add
 import { api } from "../lib/api";
+
+import api from "@/configs/axios";
+ main
 import { toast } from "sonner";
 
 interface SidebarProps {
@@ -23,24 +27,54 @@ interface SidebarProps {
 const Sidebar = ({
   isMenuOpen,
   Project,
+controllers-or-stripe-add
+
+  SetProject,
+ main
   isGenerating,
   setIsGenerating,
 }: SidebarProps) => {
   const messageRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
 
+  const fetchProject = async () => {
+    try{
+      const {data} = await api.get(`/api/user/project/${Project.id}`)
+      SetProject(data.project)
+    }catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    }
+  }
+
   const handleRollback = async (versionId: string) => {
     try {
+ controllers-or-stripe-add
       await api.post(`/api/projects/${Project.id}/rollback/${versionId}`);
       toast.success('Rolled back successfully');
       window.location.reload();
     } catch {
       toast.error('Rollback failed');
+
+      const confirm=window.confirm("Are you sure you want to rollback to this version")
+      if(!confirm)return;
+      setIsGenerating(true)
+      const {data}=await api.get(`/api/project/rollback/${Project.id}/${versionId}`)
+      const {data:data2}=await api.get(`/api/user/project/${Project.id}`)
+      toast.success(data.message)
+      SetProject(data2.project)
+      setIsGenerating(false)
+    }catch (error: any) {
+      setIsGenerating(false)
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+ main
     }
   };
 
   const handleRevesion = async (e: React.FormEvent) => {
     e.preventDefault()
+ controllers-or-stripe-add
     if (!input.trim()) return;
     setIsGenerating(true)
     try {
@@ -50,6 +84,25 @@ const Sidebar = ({
       console.error(err);
     } finally {
       setIsGenerating(false)
+
+    let interval:number | undefined;
+    try {
+      setIsGenerating(true);
+      interval=setInterval(() => {
+        fetchProject();
+      },10000)
+      const {data}=await api.post(`/api/project/revision/${Project.id}`,{message:input})
+      fetchProject();
+      toast.success('data.message')
+      setInput("");
+      clearInterval(interval)
+      setIsGenerating(false);
+    }catch(error: any){
+      setIsGenerating(false);
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+      clearInterval(interval);
+ main
     }
   }
 

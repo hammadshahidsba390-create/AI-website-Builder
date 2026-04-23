@@ -4,8 +4,12 @@ import cors from 'cors';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './lib/auth.js';
 import userRouter from './routes/UserRoutes.js';
+ controllers-or-stripe-add
 import projectRouter from './routes/ProjectRoutes.js';
 import { stripeWebhook } from './controllers/stripeWebhooks.js';
+
+import projectRouter from './routes/projectRoute.js';
+ main
 
 const app = express();
 const port = 3000;
@@ -28,9 +32,14 @@ app.all('/api/auth/*', toNodeHandler(auth));
 app.get('/', (req: Request, res: Response) => {
     res.send('AI Website Builder Server is Live!');
 });
+ controllers-or-stripe-add
 
 app.use('/api/user', userRouter);
 app.use('/api/projects', projectRouter);
+
+app.use('/api/user',userRouter);
+app.use('/api/project', projectRouter);
+ main
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
