@@ -1,10 +1,7 @@
 {
-change
-  "functions": {
-    "server/server.ts": {
-      "maxDuration": 30
-
   "version": 2,
+ change
+
   "builds": [
     {
       "src": "server/server.ts",
@@ -25,20 +22,10 @@ change
  main
     }
   ],
+ main
   "functions": {
     "server/server.ts": {
-vercel-changes-for-deployment-to-deduct-error
-      "runtime": "nodejs20.x"
-
       "runtime": "@vercel/node"
- main
-
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "client/dist"
-      }
- main
     }
   },
   "rewrites": [
@@ -48,13 +35,7 @@ vercel-changes-for-deployment-to-deduct-error
     },
     {
       "source": "/((?!api/).*)",
-change
       "destination": "/client/dist/index.html"
-
-      "destination": "/index.html"
-
-      main
- main
     }
   ]
 }
