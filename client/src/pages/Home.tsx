@@ -1,17 +1,29 @@
-import { Loader2Icon } from 'lucide-react';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
+import { toast } from 'sonner';
+import { Loader2Icon } from 'lucide-react';
 
 const Home = () => {
-  const [, setInput] = useState('');
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!input.trim() || loading) return;
+    
     setLoading(true);
-
-    setTimeout(() => {
+    try {
+      const { data } = await api.post('/api/projects', { initial_prompt: input });
+      toast.success("Design started! Redirecting...");
+      navigate(`/projects/${data.projectId}`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to start generation");
+      console.error(error);
+    } finally {
       setLoading(false);
-    }, 3000);
+    }
   };
 
   return (
